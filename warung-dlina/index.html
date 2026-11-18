@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Warung Dlina — Menu & Pesanan</title>
+<style>
+  :root {
+    --green: #1b7a3d;
+    --green-dark: #145c2e;
+    --yellow: #ffd54a;
+    --bg: #f6f8f4;
+    --card: #ffffff;
+    --text: #222;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding-bottom: 90px;
+  }
+  header {
+    background: linear-gradient(135deg, var(--green), var(--green-dark));
+    color: #fff;
+    padding: 28px 16px 22px;
+    text-align: center;
+  }
+  header h1 { font-size: 1.9rem; letter-spacing: 1px; }
+  header p { margin-top: 6px; opacity: .9; font-size: .95rem; }
+  .badge {
+    display: inline-block; background: var(--yellow); color: #5a4300;
+    font-weight: bold; font-size: .78rem; padding: 4px 12px;
+    border-radius: 999px; margin-bottom: 10px;
+  }
+  main { max-width: 520px; margin: 0 auto; padding: 16px; }
+  .section-title {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 1.15rem; font-weight: 700; color: var(--green-dark);
+    margin: 22px 0 12px;
+  }
+  .menu-item {
+    background: var(--card); border-radius: 14px; padding: 14px 16px;
+    margin-bottom: 10px; display: flex; justify-content: space-between;
+    align-items: center; box-shadow: 0 1px 4px rgba(0,0,0,.08);
+  }
+  .menu-item .name { font-weight: 600; font-size: 1rem; }
+  .menu-item .note { font-size: .78rem; color: #777; margin-top: 2px; }
+  .add-btn {
+    background: var(--green); color: #fff; border: none;
+    width: 34px; height: 34px; border-radius: 50%;
+    font-size: 1.2rem; cursor: pointer; flex-shrink: 0;
+  }
+  .add-btn:active { transform: scale(.92); }
+  .price { font-weight: 700; color: var(--green-dark); margin-top: 3px; font-size: .92rem; }
+
+  .cart-bar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--green-dark); color: #fff;
+    padding: 14px 18px; display: flex; justify-content: space-between;
+    align-items: center; box-shadow: 0 -2px 10px rgba(0,0,0,.2);
+    max-width: 520px; margin: 0 auto;
+  }
+  .cart-bar button {
+    background: var(--yellow); color: #5a4300; font-weight: bold;
+    border: none; padding: 10px 18px; border-radius: 10px;
+    cursor: pointer; font-size: .95rem;
+  }
+  .contact-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;
+  }
+  .contact-card {
+    background: var(--card); border-radius: 14px; padding: 16px;
+    text-align: center; text-decoration: none; color: var(--text);
+    box-shadow: 0 1px 4px rgba(0,0,0,.08); display: block;
+  }
+  .contact-card .icon { font-size: 1.8rem; }
+  .contact-card .label { font-weight: 700; margin-top: 6px; }
+  .contact-card .sub { font-size: .78rem; color: #777; margin-top: 2px; }
+  .contact-card.wa .label { color: #128c4a; }
+  .contact-card.map .label { color: #c0392b; }
+
+  /* Cart modal */
+  .modal-bg {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45);
+    z-index: 10; align-items: flex-end; justify-content: center;
+  }
+  .modal-bg.open { display: flex; }
+  .modal {
+    background: #fff; width: 100%; max-width: 520px;
+    border-radius: 18px 18px 0 0; padding: 20px; max-height: 85vh; overflow-y: auto;
+  }
+  .modal h2 { color: var(--green-dark); margin-bottom: 12px; }
+  .cart-line {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 0; border-bottom: 1px dashed #ddd;
+  }
+  .qty-controls { display: flex; align-items: center; gap: 10px; }
+  .qty-controls button {
+    width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--green);
+    background: #fff; color: var(--green); font-weight: bold; cursor: pointer;
+  }
+  .modal input, .modal textarea {
+    width: 100%; padding: 10px; margin-top: 6px; border: 1px solid #ccc;
+    border-radius: 10px; font-size: .95rem; font-family: inherit;
+  }
+  .modal label { font-weight: 600; font-size: .88rem; display: block; margin-top: 14px; }
+  .send-btn {
+    width: 100%; background: #25d366; color: #fff; font-weight: bold;
+    border: none; padding: 14px; border-radius: 12px; font-size: 1rem;
+    margin-top: 16px; cursor: pointer;
+  }
+  .close-x {
+    float: right; background: none; border: none; font-size: 1.3rem;
+    cursor: pointer; color: #888;
+  }
+  .empty { text-align: center; color: #999; padding: 20px 0; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">BUKA SETIAP HARI</div>
+  <h1>🍲 Warung Dlina</h1>
+  <p>Pilih menu anda & pesan terus melalui WhatsApp</p>
+</header>
+
+<main>
+  <div class="section-title">🍽️ Makanan</div>
+  <div id="food-list"></div>
+
+  <div class="section-title">🥤 Minuman</div>
+  <div id="drink-list"></div>
+
+  <div class="section-title">📍 Hubungi Kami</div>
+  <div class="contact-grid">
+    <a class="contact-card wa" id="wa-link" target="_blank">
+      <div class="icon">💬</div>
+      <div class="label">WhatsApp</div>
+      <div class="sub">Tempahan / pertanyaan</div>
+    </a>
+    <a class="contact-card map" id="map-link" target="_blank">
+      <div class="icon">🗺️</div>
+      <div class="label">Lokasi Warung</div>
+      <div class="sub">Buka dalam Google Maps</div>
+    </a>
+  </div>
+</main>
+
+<div class="cart-bar" id="cart-bar" style="display:none">
+  <span id="cart-summary">0 item</span>
+  <button onclick="openCart()">🛒 Lihat Pesanan</button>
+</div>
+
+<div class="modal-bg" id="cart-modal" onclick="if(event.target===this) closeCart()">
+  <div class="modal">
+    <button class="close-x" onclick="closeCart()">✕</button>
+    <h2>Pesanan Anda</h2>
+    <div id="cart-lines"></div>
+    <label>Nama anda</label>
+    <input id="cust-name" placeholder="Contoh: Ahmad">
+    <label>Jamuan / ambil sendiri?</label>
+    <select id="order-type" style="width:100%;padding:10px;margin-top:6px;border:1px solid #ccc;border-radius:10px;font-size:.95rem">
+      <option>Makan di warung</option>
+      <option>Ambil sendiri (take away)</option>
+    </select>
+    <label>Catatan tambahan</label>
+    <textarea id="cust-note" rows="2" placeholder="Contoh: kurang pedas, tanpa timun..."></textarea>
+    <button class="send-btn" onclick="sendOrder()">📲 Hantar Pesanan via WhatsApp</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   ⚙️ UBAH MAKANAT DI SINI — replace these 3 placeholders:
+   ============================================================ */
+const CONFIG = {
+  WHATSAPP_NUMBER: "60123456789",   // ← ganti dengan nombor WhatsApp sebenar (format 60XXXXXXXXX, tanpa + dan tanpa 0 di hadapan)
+  MAPS_URL: "https://maps.google.com/?q=Warung+Dlina", // ← ganti dengan link lokasi sebenar (share location dari Google Maps)
+  MENU_URL: "https://warung-dlina.example.com"          // ← ganti dengan link laman menu ini selepas di-host
+};
+
+const MENU = {
+  food: [
+    { name: "Rojak Pasembor", price: null },
+    { name: "Mi Rojak", price: null },
+    { name: "Laksa", price: null },
+    { name: "Mi Rebus", price: null },
+    { name: "Ayam Goreng / Ayam Goreng Korea", price: null },
+    { name: "Goreng Pisang", price: null },
+    { name: "Mi Kari", price: null },
+  ],
+  drink: [
+    { name: "Air Bancuh Sejuk / Panas", price: null },
+    { name: "Cendol", price: null },
+    { name: "Air Cincau", price: null },
+  ]
+};
+
+const cart = {};
+
+function renderList(containerId, items, emoji) {
+  document.getElementById(containerId).innerHTML = items.map((it, i) => `
+    <div class="menu-item">
+      <div>
+        <div class="name">${it.name}</div>
+        ${it.price ? `<div class="price">RM ${it.price.toFixed(2)}</div>` : `<div class="note">Harga rujuk di warung / WhatsApp</div>`}
+      </div>
+      <button class="add-btn" onclick="addToCart('${encodeURIComponent(it.name)}')">＋</button>
+    </div>`).join("");
+}
+
+function addToCart(nameEnc) {
+  const name = decodeURIComponent(nameEnc);
+  cart[name] = (cart[name] || 0) + 1;
+  updateCartBar();
+}
+
+function changeQty(name, delta) {
+  cart[name] = (cart[name] || 0) + delta;
+  if (cart[name] <= 0) delete cart[name];
+  updateCartBar();
+  renderCart();
+}
+
+function updateCartBar() {
+  const count = Object.values(cart).reduce((a, b) => a + b, 0);
+  document.getElementById("cart-bar").style.display = count ? "flex" : "none";
+  document.getElementById("cart-summary").textContent = `${count} item dipilih`;
+}
+
+function renderCart() {
+  const names = Object.keys(cart);
+  document.getElementById("cart-lines").innerHTML = names.length
+    ? names.map(n => `
+      <div class="cart-line">
+        <div><b>${n}</b><br><small style="color:#888">x${cart[n]}</small></div>
+        <div class="qty-controls">
+          <button onclick="changeQty('${n.replace(/'/g,"\\'")}', -1)">−</button>
+          <button onclick="changeQty('${n.replace(/'/g,"\\'")}', 1)">＋</button>
+        </div>
+      </div>`).join("")
+    : `<div class="empty">Belum ada item. Pilih menu di atas 😊</div>`;
+}
+
+function openCart() { renderCart(); document.getElementById("cart-modal").classList.add("open"); }
+function closeCart() { document.getElementById("cart-modal").classList.remove("open"); }
+
+function sendOrder() {
+  const names = Object.keys(cart);
+  if (!names.length) { alert("Sila pilih menu dahulu 😊"); return; }
+  const name = document.getElementById("cust-name").value.trim() || "-";
+  const type = document.getElementById("order-type").value;
+  const note = document.getElementById("cust-note").value.trim();
+  let msg = `Hai Warung Dlina! 🍲\nSaya ingin membuat pesanan:\n\n`;
+  names.forEach(n => msg += `• ${n} x${cart[n]}\n`);
+  msg += `\nNama: ${name}\nJenis: ${type}`;
+  if (note) msg += `\nCatatan: ${note}`;
+  msg += `\n\nTerima kasih! 🙏`;
+  window.open(`https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, "_blank");
+}
+
+// Wire up contact links
+document.getElementById("wa-link").href = `https://wa.me/${CONFIG.WHATSAPP_NUMBER}`;
+document.getElementById("map-link").href = CONFIG.MAPS_URL;
+
+renderList("food-list", MENU.food);
+renderList("drink-list", MENU.drink);
+</script>
+</body>
+</html>

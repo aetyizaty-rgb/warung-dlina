@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Warung Dlina — QR Codes</title>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<style>
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background:#f6f8f4; margin:0; padding:24px; }
+  h1 { text-align:center; color:#145c2e; }
+  p.hint { text-align:center; color:#666; max-width:640px; margin:8px auto 24px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:20px; max-width:900px; margin:0 auto; }
+  .card { background:#fff; border-radius:16px; padding:20px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,.1); }
+  .card h2 { color:#1b7a3d; font-size:1.1rem; margin-bottom:4px; }
+  .card .desc { font-size:.85rem; color:#777; margin-bottom:14px; }
+  .card canvas { border:1px solid #eee; border-radius:8px; }
+  .card .url { font-size:.72rem; color:#aaa; word-break:break-all; margin-top:10px; }
+  .inputs { max-width:900px; margin:0 auto 20px; display:grid; gap:10px; }
+  .inputs input { padding:10px; border:1px solid #ccc; border-radius:10px; font-size:.9rem; width:100%; }
+  .inputs button { background:#1b7a3d; color:#fff; border:none; padding:12px; border-radius:10px; font-weight:bold; cursor:pointer; font-size:.95rem; }
+  @media print { .inputs, .hint, h1 { display:none; } .card { box-shadow:none; page-break-inside:avoid; } }
+</style>
+</head>
+<body>
+<h1>📲 Warung Dlina — QR Codes</h1>
+<p class="hint">Masukkan nombor WhatsApp, link lokasi Google Maps dan link laman menu di bawah, kemudian klik "Jana QR". Cetak (Ctrl+P) dan tampal QR di gerai warung.</p>
+
+<div class="inputs">
+  <input id="in-wa" placeholder="Nombor WhatsApp (contoh: 60123456789)">
+  <input id="in-map" placeholder="Link lokasi Google Maps">
+  <input id="in-menu" placeholder="Link laman menu (contoh: https://warungdlina.netlify.app)">
+  <button onclick="generate()">🔄 Jana QR Codes</button>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <h2>🍽️ Menu Warung</h2>
+    <div class="desc">Imbas untuk lihat menu & buat pesanan</div>
+    <div id="qr-menu"></div>
+    <div class="url" id="url-menu"></div>
+  </div>
+  <div class="card">
+    <h2>💬 WhatsApp</h2>
+    <div class="desc">Imbas untuk chat terus dengan warung</div>
+    <div id="qr-wa"></div>
+    <div class="url" id="url-wa"></div>
+  </div>
+  <div class="card">
+    <h2>📍 Lokasi</h2>
+    <div class="desc">Imbas untuk ke lokasi warung</div>
+    <div id="qr-map"></div>
+    <div class="url" id="url-map"></div>
+  </div>
+</div>
+
+<script>
+function generate() {
+  const wa = document.getElementById("in-wa").value.trim() || "60123456789";
+  const map = document.getElementById("in-map").value.trim() || "https://maps.google.com/?q=Warung+Dlina";
+  const menu = document.getElementById("in-menu").value.trim() || "https://warung-dlina.example.com";
+
+  const targets = [
+    { el: "qr-menu", url: menu, label: "url-menu" },
+    { el: "qr-wa",   url: "https://wa.me/" + wa.replace(/\D/g,""), label: "url-wa" },
+    { el: "qr-map",  url: map, label: "url-map" },
+  ];
+  targets.forEach(t => {
+    document.getElementById(t.el).innerHTML = "";
+    QRCode.toCanvas(t.url, { width: 200, margin: 2 }, (err, canvas) => {
+      if (err) { document.getElementById(t.el).textContent = "Ralat: " + err; return; }
+      document.getElementById(t.el).appendChild(canvas);
+      document.getElementById(t.label).textContent = t.url;
+    });
+  });
+}
+generate(); // render with defaults on first open
+</script>
+</body>
+</html>
